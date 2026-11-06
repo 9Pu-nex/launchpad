@@ -4,109 +4,309 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Shortcuts</title>
+<script>
+  try { document.documentElement.dataset.theme = localStorage.getItem("my-shortcuts-theme") || "light"; }
+  catch (e) { document.documentElement.dataset.theme = "light"; }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f6f8; --card: #ffffff; --text: #1f2430; --muted: #6b7280;
-    --border: #e3e6ec; --accent: #3b6cf6; --danger: #e5484d;
+  /* ===== Themes: light (ขาว) / mint (มิ้นท์) / dark (มืด) ===== */
+  :root, :root[data-theme="light"] {
+    --bg: #ffffff; --surface: #f6f8fb; --card: #ffffff; --text: #0f172a; --muted: #64748b;
+    --border: #e5e9f0; --accent: #2563eb; --accent-ink: #ffffff; --accent-soft: #e8efff;
+    --header: rgba(255,255,255,.88); --hero: linear-gradient(180deg,#f1f5fb 0%,#ffffff 100%);
+    --footer: #f6f8fb; --shadow: 0 6px 20px rgba(15,23,42,.08); --danger: #dc2626; --tile: #eef2f7;
   }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #14161b; --card: #1d2027; --text: #e8eaee; --muted: #9aa1ad; --border: #2c303a; --accent: #6b8cff; --danger: #ff6369; }
+  :root[data-theme="mint"] {
+    --bg: #f3fcf8; --surface: #e3f7ef; --card: #ffffff; --text: #0b2e25; --muted: #4f7a6d;
+    --border: #cdebdf; --accent: #0d9a7a; --accent-ink: #ffffff; --accent-soft: #d3f4e8;
+    --header: rgba(236,252,246,.9); --hero: linear-gradient(135deg,#c9f2e2 0%,#effcf7 70%);
+    --footer: #def5ea; --shadow: 0 6px 20px rgba(13,154,122,.14); --danger: #d6455a; --tile: #e3f7ef;
   }
+  :root[data-theme="dark"] {
+    --bg: #0b0c0c; --surface: #121413; --card: #171a19; --text: #e9eeec; --muted: #94a3a0;
+    --border: #262b2a; --accent: #34d399; --accent-ink: #052e22; --accent-soft: #123a2c;
+    --header: rgba(9,8,8,.88); --hero: linear-gradient(135deg,#10261d 0%,#0b0c0c 75%);
+    --footer: #090808; --shadow: 0 8px 24px rgba(0,0,0,.45); --danger: #f87171; --tile: #212625;
+  }
+
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif; background: var(--bg); color: var(--text); }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
-  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  h1 { font-size: 1.4rem; margin: 0; }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
-  input, select, button { font: inherit; color: inherit; }
-  input, select { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
-  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-  button { padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; transition: background .2s, color .2s; }
+  main { flex: 1; }
+  .container { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  input, select, button, textarea { font: inherit; color: inherit; }
+  input[type=text], input[type=url], input[type=search], input[type=password], input:not([type]) {
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); width: 100%;
+  }
+  input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button { cursor: pointer; padding: 9px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); transition: border-color .15s, background .15s; }
   button:hover { border-color: var(--accent); }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button.primary:hover { filter: brightness(1.06); }
   button.danger:hover { border-color: var(--danger); color: var(--danger); }
-  #search { min-width: 200px; }
-  .status { font-size: .8rem; color: var(--muted); margin-bottom: 16px; min-height: 1.2em; }
-  .status.err { color: var(--danger); }
-  .add-form { display: none; gap: 8px; flex-wrap: wrap; padding: 14px; margin-bottom: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
-  .add-form.open { display: flex; }
-  .add-form input { flex: 1 1 180px; }
-  .group { margin-bottom: 24px; }
-  .group h2 { font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
-  .item { position: relative; display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: inherit; transition: transform .1s, border-color .1s; }
-  .item:hover { transform: translateY(-1px); border-color: var(--accent); }
-  .item img { width: 28px; height: 28px; border-radius: 6px; flex: none; }
+  button.small { padding: 4px 10px; font-size: .82rem; }
+
+  /* ===== Header ===== */
+  .site-header { position: sticky; top: 0; z-index: 20; background: var(--header); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+  .site-header .container { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; text-decoration: none; color: inherit; }
+  .logo { width: 36px; height: 36px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: 1.1rem; }
+  .head-actions { display: flex; align-items: center; gap: 8px; }
+  .themes { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
+  .themes button { width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 2px solid transparent; }
+  .themes button[data-t="light"] { background: #ffffff; box-shadow: inset 0 0 0 1px #cbd5e1; }
+  .themes button[data-t="mint"] { background: #7ee0bf; }
+  .themes button[data-t="dark"] { background: #1a1d1c; box-shadow: inset 0 0 0 1px #3a4140; }
+  .themes button.active { border-color: var(--accent); }
+
+  /* ===== Hero ===== */
+  .hero { background: var(--hero); border-bottom: 1px solid var(--border); padding: 44px 0 28px; text-align: center; }
+  .hero h1 { margin: 0 0 8px; font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.25; }
+  .hero p { margin: 0 auto 22px; color: var(--muted); max-width: 560px; }
+  .searchbox { max-width: 520px; margin: 0 auto; }
+  .searchbox input { padding: 14px 18px; border-radius: 999px; font-size: 1rem; box-shadow: var(--shadow); }
+  .stats { margin-top: 14px; font-size: .85rem; color: var(--muted); }
+
+  /* ===== Chips ===== */
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 20px 0 6px; }
+  .chip { border-radius: 999px; padding: 6px 14px; font-size: .9rem; background: var(--card); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  .chip.manage { border-style: dashed; color: var(--muted); }
+  .statusline { text-align: center; font-size: .8rem; color: var(--muted); min-height: 1.4em; padding-bottom: 6px; }
+  .statusline.err { color: var(--danger); font-weight: 600; }
+
+  /* ===== Sections / cards ===== */
+  .content { padding: 14px 0 56px; }
+  .group { margin-top: 26px; }
+  .group-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .group-head .gi { width: 32px; height: 32px; border-radius: 10px; background: var(--accent-soft); display: grid; place-items: center; font-size: 1.05rem; }
+  .group-head h2 { margin: 0; font-size: 1.05rem; }
+  .group-head .count { font-size: .8rem; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .item { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; text-decoration: none; color: inherit; transition: transform .12s, box-shadow .12s, border-color .12s; }
+  .item:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--accent); }
+  .ico { width: 44px; height: 44px; border-radius: 13px; background: var(--tile); display: grid; place-items: center; flex: none; overflow: hidden; }
+  .ico img { width: 28px; height: 28px; object-fit: contain; }
+  .ico.cover img { width: 100%; height: 100%; object-fit: cover; }
+  .ico.txt { font-size: 1.45rem; line-height: 1; }
   .item .t { min-width: 0; }
   .item .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item .host { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .host { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .actions { position: absolute; top: 6px; right: 6px; display: none; gap: 4px; }
   body.edit .actions { display: flex; }
-  .actions button { padding: 2px 8px; font-size: .8rem; }
-  .empty { text-align: center; color: var(--muted); padding: 48px 0; }
-  .hint { font-size: .8rem; color: var(--muted); margin-top: 28px; text-align: center; }
+  .empty { text-align: center; color: var(--muted); padding: 56px 0; }
+
+  /* ===== Footer ===== */
+  .site-footer { background: var(--footer); border-top: 1px solid var(--border); padding: 36px 0 20px; font-size: .9rem; }
+  .foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 28px; }
+  .site-footer h3 { margin: 0 0 12px; font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .site-footer p { margin: 8px 0 0; color: var(--muted); max-width: 340px; }
+  .flinks { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .flinks button { background: none; border: none; padding: 2px 0; color: var(--text); text-align: left; }
+  .flinks button:hover { color: var(--accent); }
+  .foot-bottom { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .8rem; }
+  @media (max-width: 720px) { .foot-grid { grid-template-columns: 1fr; } .head-actions .lbl { display: none; } }
+
+  /* ===== Dialogs ===== */
+  dialog { border: 1px solid var(--border); border-radius: 18px; padding: 0; background: var(--card); color: var(--text); width: min(540px, 94vw); box-shadow: var(--shadow); }
+  dialog::backdrop { background: rgba(0,0,0,.5); }
+  .dlg-body { padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .dlg-body h3 { margin: 0 0 2px; font-size: 1.15rem; }
+  .field label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .row > input { flex: 1 1 160px; }
+  .dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+  .emojis { display: flex; flex-wrap: wrap; gap: 4px; }
+  .emojis button { padding: 4px 6px; font-size: 1.15rem; border-color: transparent; background: var(--surface); }
+  .hint { font-size: .78rem; color: var(--muted); }
+  input[type=color] { width: 44px; height: 38px; padding: 2px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); cursor: pointer; }
+  .catrow { display: grid; grid-template-columns: 64px 1fr auto auto; gap: 8px; align-items: center; }
+  .catrow input.ic { text-align: center; padding: 8px 4px; }
+  .catlist { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; overflow: auto; padding: 2px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>🔗 My Shortcuts</h1>
-    <div class="toolbar">
-      <input id="search" type="search" placeholder="ค้นหา...">
-      <button class="primary" id="btnAdd">+ เพิ่มลิงก์</button>
-      <button id="btnEdit">✏️ แก้ไข/ลบ</button>
-      <button id="btnSync" title="โหลดข้อมูลล่าสุดจาก Google Sheets">🔄</button>
-      <button id="btnCfg">⚙️ ตั้งค่า</button>
-      <button id="btnExport">Export</button>
-      <button id="btnImport">Import</button>
-      <input id="file" type="file" accept="application/json" hidden>
+
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="#top"><span class="logo">🔗</span><span>My Shortcuts</span></a>
+    <div class="head-actions">
+      <div class="themes" role="group" aria-label="ธีม">
+        <button data-t="light" title="ธีมขาว" aria-label="ธีมขาว"></button>
+        <button data-t="mint" title="ธีมมิ้นท์" aria-label="ธีมมิ้นท์"></button>
+        <button data-t="dark" title="โหมดมืด" aria-label="โหมดมืด"></button>
+      </div>
+      <button id="btnEdit" title="แก้ไข / ลบ">✏️<span class="lbl"> แก้ไข</span></button>
+      <button class="primary" id="btnAdd">＋<span class="lbl"> เพิ่มลิงก์</span></button>
     </div>
-  </header>
-  <div class="status" id="status"></div>
+  </div>
+</header>
 
-  <form class="add-form" id="cfgForm">
-    <input id="cfgUrl" placeholder="Web App URL (https://script.google.com/macros/s/.../exec)">
-    <input id="cfgToken" type="password" placeholder="Token (รหัสเดียวกับใน Code.gs)">
-    <button class="primary" type="submit">บันทึกและเชื่อมต่อ</button>
-    <button type="button" id="cfgLocal">ใช้โหมดเครื่องนี้</button>
-    <button type="button" id="cfgCancel">ปิด</button>
+<section class="hero" id="top">
+  <div class="container">
+    <h1>รวมลิงก์ที่ใช้บ่อยของฉัน</h1>
+    <p>ทางลัดไปยังเว็บและเครื่องมือทั้งหมด จัดเป็นหมวดหมู่ ค้นหาได้ในพริบตา</p>
+    <div class="searchbox"><input id="search" type="search" placeholder="🔍 ค้นหาลิงก์..."></div>
+    <div class="stats" id="stats"></div>
+  </div>
+</section>
+
+<main>
+  <div class="container">
+    <div class="chips" id="chips"></div>
+    <div class="statusline" id="status"></div>
+    <div class="content" id="list"></div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top"><span class="logo">🔗</span><span>My Shortcuts</span></a>
+        <p>หน้ารวมทางลัดส่วนตัว เก็บข้อมูลใน Google Sheets ใช้ได้ทุกเครื่อง</p>
+      </div>
+      <div>
+        <h3>หมวดหมู่</h3>
+        <div class="flinks" id="footCats"></div>
+      </div>
+      <div>
+        <h3>เครื่องมือ</h3>
+        <div class="flinks">
+          <button id="fMgrCat">🗂️ จัดการหมวดหมู่</button>
+          <button id="fSync">🔄 โหลดข้อมูลล่าสุด</button>
+          <button id="fCfg">⚙️ ตั้งค่า Google Sheets</button>
+          <button id="fExport">⬇️ Export (สำรองข้อมูล)</button>
+          <button id="fImport">⬆️ Import</button>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span id="copy"></span>
+      <span id="footStatus"></span>
+    </div>
+  </div>
+</footer>
+<input id="file" type="file" accept="application/json" hidden>
+<input id="iconFile" type="file" accept="image/*" hidden>
+
+<!-- ===== Dialog: เพิ่ม/แก้ไขลิงก์ ===== -->
+<dialog id="linkDlg">
+  <form class="dlg-body" id="linkForm">
+    <h3 id="linkTitle">เพิ่มลิงก์</h3>
+    <div class="field"><label>ชื่อ</label><input id="fName" placeholder="เช่น Gmail" required></div>
+    <div class="field"><label>URL</label><input id="fUrl" placeholder="เช่น https://mail.google.com" required></div>
+    <div class="field">
+      <label>หมวดหมู่ (พิมพ์ชื่อใหม่ได้เลย)</label>
+      <input id="fCat" placeholder="เช่น Google" list="catList">
+      <datalist id="catList"></datalist>
+    </div>
+    <div class="field">
+      <label>ไอคอน</label>
+      <div class="row">
+        <div id="prevBox"></div>
+        <input id="fIcon" placeholder="เว้นว่าง = ไอคอนเว็บอัตโนมัติ / ใส่อีโมจิ / วางลิงก์รูป">
+        <button type="button" id="btnUpload" class="small">📁 อัปโหลด</button>
+        <button type="button" id="btnIconClear" class="small">ล้าง</button>
+      </div>
+      <div class="emojis" id="emojis" style="margin-top:8px"></div>
+    </div>
+    <div class="field">
+      <label>สีพื้นหลังไอคอน</label>
+      <div class="row">
+        <input type="color" id="fColor" value="#ffffff">
+        <button type="button" id="btnColorClear" class="small">ล้างสี</button>
+        <span class="hint">ไม่เลือก = ใช้สีตามธีม</span>
+      </div>
+    </div>
+    <div class="dlg-actions">
+      <button type="button" id="linkCancel">ยกเลิก</button>
+      <button type="submit" class="primary" id="linkSubmit">บันทึก</button>
+    </div>
   </form>
+</dialog>
 
-  <form class="add-form" id="form">
-    <input id="fName" placeholder="ชื่อ เช่น Gmail" required>
-    <input id="fUrl" placeholder="URL เช่น https://mail.google.com" required>
-    <input id="fCat" placeholder="หมวดหมู่ (ไม่บังคับ)" list="cats">
-    <datalist id="cats"></datalist>
-    <button class="primary" type="submit" id="fSubmit">บันทึก</button>
-    <button type="button" id="fCancel">ยกเลิก</button>
+<!-- ===== Dialog: จัดการหมวดหมู่ ===== -->
+<dialog id="catDlg">
+  <div class="dlg-body">
+    <h3>จัดการหมวดหมู่</h3>
+    <div class="hint">แก้ชื่อ/ไอคอนแล้วกด “บันทึก” ได้ทีละหมวด · การลบหมวดไม่ลบลิงก์ (ลิงก์จะไปอยู่ในกลุ่ม “ทั่วไป”)</div>
+    <div class="catlist" id="catRows"></div>
+    <div class="catrow">
+      <input class="ic" id="newCatIcon" placeholder="😀" maxlength="4">
+      <input id="newCatName" placeholder="ชื่อหมวดหมู่ใหม่">
+      <button class="primary" id="newCatAdd">เพิ่ม</button><span></span>
+    </div>
+    <div class="dlg-actions"><button id="catClose">ปิด</button></div>
+  </div>
+</dialog>
+
+<!-- ===== Dialog: ตั้งค่า Google Sheets ===== -->
+<dialog id="cfgDlg">
+  <form class="dlg-body" id="cfgForm">
+    <h3>ตั้งค่า Google Sheets</h3>
+    <div class="field"><label>Web App URL</label><input id="cfgUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
+    <div class="field"><label>Token (รหัสเดียวกับใน Code.gs)</label><input id="cfgToken" type="password"></div>
+    <div class="hint">ค่านี้เก็บในเบราว์เซอร์ของคุณเท่านั้น ไม่ได้อยู่ในไฟล์ HTML</div>
+    <div class="dlg-actions">
+      <button type="button" id="cfgLocal">ใช้โหมดเครื่องนี้</button>
+      <button type="button" id="cfgCancel">ปิด</button>
+      <button type="submit" class="primary">บันทึกและเชื่อมต่อ</button>
+    </div>
   </form>
-
-  <main id="list"></main>
-  <p class="hint">ค่าตั้งค่า (URL/Token) เก็บในเบราว์เซอร์ของคุณเท่านั้น ไม่ได้อยู่ในไฟล์นี้</p>
-</div>
+</dialog>
 
 <script>
 const DATA_KEY = "my-shortcuts-v1";
+const CATS_KEY = "my-shortcuts-cats-v1";
 const CFG_KEY = "my-shortcuts-cfg";
-const DEFAULTS = [
-  { id: "d1", name: "Gmail", url: "https://mail.google.com", cat: "Google" },
-  { id: "d2", name: "Google Drive", url: "https://drive.google.com", cat: "Google" },
-  { id: "d3", name: "Google Sheets", url: "https://sheets.google.com", cat: "Google" },
-  { id: "d4", name: "GitHub", url: "https://github.com", cat: "Dev" },
+const THEME_KEY = "my-shortcuts-theme";
+const NONE = "__none";
+const DEFAULT_LINKS = [
+  { id: "d1", name: "Gmail", url: "https://mail.google.com", cat: "Google", icon: "", color: "" },
+  { id: "d2", name: "Google Drive", url: "https://drive.google.com", cat: "Google", icon: "", color: "" },
+  { id: "d3", name: "Google Sheets", url: "https://sheets.google.com", cat: "Google", icon: "", color: "" },
+  { id: "d4", name: "GitHub", url: "https://github.com", cat: "Dev", icon: "", color: "" },
 ];
+const DEFAULT_CATS = [{ name: "Google", icon: "🔎" }, { name: "Dev", icon: "💻" }];
+const EMOJIS = ["⭐","🔥","📁","📧","📅","📊","📝","💼","🏫","🎓","💻","🛠️","🔒","💰","🛒","🎵","🎬","📺","🍜","✈️","🏠","❤️","🌐","🤖"];
+
 const $ = id => document.getElementById(id);
+const loadJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
+const saveJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 
 let cfg = loadJSON(CFG_KEY, {});
-let links = loadJSON(DATA_KEY, null) || DEFAULTS.slice();
+let links = loadJSON(DATA_KEY, null) || DEFAULT_LINKS.slice();
+let cats = loadJSON(CATS_KEY, null) || DEFAULT_CATS.slice();
+let filterKey = "";
 let editingId = null;
+let iconVal = "", colorVal = "";
 
-function loadJSON(k, fb) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } }
-function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 const remote = () => !!(cfg.url && cfg.token);
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const normalizeUrl = u => { u = u.trim(); return /^[a-z][a-z0-9+.-]*:/i.test(u) ? u : "https://" + u; };
+const hostOf = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return u; } };
 
-function setStatus(msg, err) { const s = $("status"); s.textContent = msg; s.classList.toggle("err", !!err); }
-function idleStatus() { setStatus(remote() ? "☁️ เชื่อมต่อ Google Sheets แล้ว" : "💾 โหมดเครื่องนี้ (ยังไม่ได้เชื่อม Google Sheets — กด ⚙️ ตั้งค่า)"); }
+// ---------- ธีม ----------
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  document.querySelectorAll(".themes button").forEach(b => b.classList.toggle("active", b.dataset.t === t));
+}
+document.querySelectorAll(".themes button").forEach(b => b.onclick = () => applyTheme(b.dataset.t));
+applyTheme(document.documentElement.dataset.theme || "light");
+
+// ---------- สถานะ / ซิงก์ ----------
+function setStatus(msg, err) {
+  const s = $("status"); s.textContent = msg; s.classList.toggle("err", !!err);
+  $("footStatus").textContent = err ? "" : msg;
+}
+function idleStatus() {
+  setStatus(remote() ? "☁️ เชื่อมต่อ Google Sheets แล้ว" : "💾 โหมดเครื่องนี้ — ยังไม่ได้เชื่อม Google Sheets (ดูที่ท้ายหน้า ⚙️ ตั้งค่า)");
+}
 
 async function call(action, payload = {}) {
   setStatus("กำลังซิงก์...");
@@ -118,8 +318,9 @@ async function call(action, payload = {}) {
     });
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || "เกิดข้อผิดพลาด");
-    links = j.links;
-    saveJSON(DATA_KEY, links);
+    links = j.links || [];
+    cats = j.cats || [];
+    saveJSON(DATA_KEY, links); saveJSON(CATS_KEY, cats);
     render();
     setStatus("✅ ซิงก์กับ Google Sheets แล้ว");
     return true;
@@ -128,172 +329,325 @@ async function call(action, payload = {}) {
     return false;
   }
 }
-
 async function mutate(action, payload, localFn) {
-  if (remote()) { await call(action, payload); }
-  else { localFn(); saveJSON(DATA_KEY, links); render(); }
+  if (remote()) return call(action, payload);
+  localFn();
+  saveJSON(DATA_KEY, links); saveJSON(CATS_KEY, cats);
+  render();
+  return true;
 }
 
-function normalizeUrl(u) {
-  u = u.trim();
-  if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
-  return u;
+// ---------- หมวดหมู่ ----------
+function allCats() {
+  const out = cats.map(c => ({ ...c }));
+  const have = new Set(out.map(c => c.name));
+  links.forEach(l => { const n = l.cat || ""; if (n && !have.has(n)) { have.add(n); out.push({ name: n, icon: "" }); } });
+  return out;
 }
-function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return u; } }
+function groupsOf(items) {
+  const g = allCats().map(c => ({ key: c.name, name: c.name, icon: c.icon || "📁", items: items.filter(l => (l.cat || "") === c.name) }));
+  const none = items.filter(l => !l.cat);
+  if (none.length) g.push({ key: NONE, name: "ทั่วไป", icon: "📌", items: none });
+  return g;
+}
 
+// ---------- ไอคอน ----------
+function iconNode(l) {
+  const d = document.createElement("div");
+  d.className = "ico";
+  if (l.color) d.style.background = l.color;
+  const ic = (l.icon || "").trim();
+  const fallback = () => { d.replaceChildren(); d.classList.add("txt"); d.textContent = "🔗"; };
+  if (/^(https?:|data:image\/)/i.test(ic)) {
+    const img = document.createElement("img");
+    img.alt = ""; img.referrerPolicy = "no-referrer"; img.src = ic; img.onerror = fallback;
+    if (/^data:/i.test(ic)) d.classList.add("cover");
+    d.appendChild(img);
+  } else if (ic) {
+    d.classList.add("txt"); d.textContent = ic;
+  } else {
+    const img = document.createElement("img");
+    img.alt = ""; img.loading = "lazy";
+    img.src = "https://www.google.com/s2/favicons?sz=64&domain=" + encodeURIComponent(hostOf(l.url));
+    img.onerror = fallback;
+    d.appendChild(img);
+  }
+  return d;
+}
+
+// ---------- แสดงผลหลัก ----------
 function render() {
   const q = $("search").value.trim().toLowerCase();
-  const list = $("list");
-  list.innerHTML = "";
-
   const filtered = links.filter(l => !q || (l.name + " " + l.url + " " + (l.cat || "")).toLowerCase().includes(q));
-  if (!filtered.length) {
+  const groups = groupsOf(filtered);
+  const allGroups = groupsOf(links);
+
+  $("stats").textContent = links.length + " ลิงก์ · " + allCats().length + " หมวดหมู่";
+
+  // chips
+  const chips = $("chips"); chips.innerHTML = "";
+  const mk = (label, key) => {
+    const b = document.createElement("button");
+    b.className = "chip" + (filterKey === key ? " active" : "");
+    b.textContent = label;
+    b.onclick = () => { filterKey = filterKey === key ? "" : key; render(); };
+    chips.appendChild(b);
+  };
+  mk("ทั้งหมด", "");
+  allGroups.filter(g => g.items.length || g.key !== NONE).forEach(g => mk(g.icon + " " + g.name, g.key));
+  const mg = document.createElement("button");
+  mg.className = "chip manage"; mg.textContent = "＋ จัดการหมวดหมู่"; mg.onclick = openCatDlg;
+  chips.appendChild(mg);
+
+  // sections
+  const list = $("list"); list.innerHTML = "";
+  const shown = groups.filter(g => g.items.length && (!filterKey || g.key === filterKey));
+  if (!shown.length) {
     const d = document.createElement("div");
     d.className = "empty";
-    d.textContent = links.length ? "ไม่พบลิงก์ที่ค้นหา" : "ยังไม่มีลิงก์ — กด “+ เพิ่มลิงก์”";
+    d.textContent = links.length ? "ไม่พบลิงก์ที่ตรงกับเงื่อนไข" : "ยังไม่มีลิงก์ — กด “＋ เพิ่มลิงก์” ที่มุมขวาบน";
     list.appendChild(d);
   }
-
-  const groups = {};
-  filtered.forEach(l => { (groups[l.cat || "ทั่วไป"] ||= []).push(l); });
-  Object.keys(groups).forEach(cat => {
-    const g = document.createElement("section");
-    g.className = "group";
-    const h = document.createElement("h2");
-    h.textContent = cat;
-    const grid = document.createElement("div");
-    grid.className = "grid";
-    groups[cat].forEach(l => grid.appendChild(card(l)));
-    g.append(h, grid);
-    list.appendChild(g);
+  shown.forEach(g => {
+    const sec = document.createElement("section");
+    sec.className = "group"; sec.id = "cat-" + encodeURIComponent(g.key);
+    const head = document.createElement("div"); head.className = "group-head";
+    const gi = document.createElement("div"); gi.className = "gi"; gi.textContent = g.icon;
+    const h = document.createElement("h2"); h.textContent = g.name;
+    const c = document.createElement("span"); c.className = "count"; c.textContent = g.items.length + " ลิงก์";
+    head.append(gi, h, c);
+    const grid = document.createElement("div"); grid.className = "grid";
+    g.items.forEach(l => grid.appendChild(card(l)));
+    sec.append(head, grid);
+    list.appendChild(sec);
   });
 
-  const dl = $("cats");
-  dl.innerHTML = "";
-  [...new Set(links.map(l => l.cat).filter(Boolean))].forEach(c => {
-    const o = document.createElement("option"); o.value = c; dl.appendChild(o);
+  // datalist + footer
+  const dl = $("catList"); dl.innerHTML = "";
+  allCats().forEach(c => { const o = document.createElement("option"); o.value = c.name; dl.appendChild(o); });
+  const fc = $("footCats"); fc.innerHTML = "";
+  allGroups.filter(g => g.items.length).forEach(g => {
+    const b = document.createElement("button");
+    b.textContent = g.icon + " " + g.name;
+    b.onclick = () => { filterKey = g.key; render(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    fc.appendChild(b);
   });
 }
 
 function card(l) {
   const a = document.createElement("a");
-  a.className = "item";
-  a.href = l.url;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
+  a.className = "item"; a.href = l.url; a.target = "_blank"; a.rel = "noopener noreferrer";
   a.addEventListener("click", e => { if (document.body.classList.contains("edit")) e.preventDefault(); });
 
-  const img = document.createElement("img");
-  img.alt = ""; img.loading = "lazy";
-  img.src = "https://www.google.com/s2/favicons?sz=64&domain=" + encodeURIComponent(hostOf(l.url));
-
-  const t = document.createElement("div");
-  t.className = "t";
+  const t = document.createElement("div"); t.className = "t";
   const n = document.createElement("div"); n.className = "name"; n.textContent = l.name;
   const h = document.createElement("div"); h.className = "host"; h.textContent = hostOf(l.url);
   t.append(n, h);
 
-  const act = document.createElement("div");
-  act.className = "actions";
-  const be = document.createElement("button"); be.textContent = "แก้";
-  be.onclick = e => { e.preventDefault(); e.stopPropagation(); startEdit(l.id); };
-  const bd = document.createElement("button"); bd.textContent = "ลบ"; bd.className = "danger";
+  const act = document.createElement("div"); act.className = "actions";
+  const be = document.createElement("button"); be.className = "small"; be.textContent = "แก้";
+  be.onclick = e => { e.preventDefault(); e.stopPropagation(); openLinkDlg(l.id); };
+  const bd = document.createElement("button"); bd.className = "small danger"; bd.textContent = "ลบ";
   bd.onclick = e => {
     e.preventDefault(); e.stopPropagation();
-    if (confirm("ลบ “" + l.name + "” ?"))
-      mutate("delete", { id: l.id }, () => { links = links.filter(x => x.id !== l.id); });
+    if (confirm("ลบ “" + l.name + "” ?")) mutate("delete", { id: l.id }, () => { links = links.filter(x => x.id !== l.id); });
   };
   act.append(be, bd);
 
-  a.append(img, t, act);
+  a.append(iconNode(l), t, act);
   return a;
 }
 
-function openForm(open) {
-  $("form").classList.toggle("open", open);
-  if (open) { $("cfgForm").classList.remove("open"); $("fName").focus(); }
-  else { editingId = null; $("form").reset(); $("fSubmit").textContent = "บันทึก"; }
-}
-function startEdit(id) {
-  const l = links.find(x => x.id === id); if (!l) return;
-  editingId = id;
-  $("fName").value = l.name; $("fUrl").value = l.url; $("fCat").value = l.cat || "";
-  $("fSubmit").textContent = "อัปเดต";
-  openForm(true);
-  $("form").scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-$("btnAdd").onclick = () => { editingId = null; $("form").reset(); openForm(true); };
-$("fCancel").onclick = () => openForm(false);
+$("search").addEventListener("input", render);
 $("btnEdit").onclick = () => {
   const on = document.body.classList.toggle("edit");
-  $("btnEdit").textContent = on ? "✅ เสร็จสิ้น" : "✏️ แก้ไข/ลบ";
+  $("btnEdit").innerHTML = on ? "✅<span class=\"lbl\"> เสร็จสิ้น</span>" : "✏️<span class=\"lbl\"> แก้ไข</span>";
 };
-$("search").addEventListener("input", render);
-$("btnSync").onclick = () => { if (remote()) call("list"); else idleStatus(); };
 
-$("form").addEventListener("submit", async e => {
+// ---------- Dialog: ลิงก์ ----------
+function closeOnBackdrop(dlg) { dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); }); }
+["linkDlg", "catDlg", "cfgDlg"].forEach(id => closeOnBackdrop($(id)));
+
+function renderPreview() {
+  $("prevBox").replaceChildren(iconNode({ icon: iconVal, color: colorVal, url: normalizeUrl($("fUrl").value || "example.com") }));
+}
+function openLinkDlg(id) {
+  const l = id ? links.find(x => x.id === id) : null;
+  editingId = l ? l.id : null;
+  $("linkTitle").textContent = l ? "แก้ไขลิงก์" : "เพิ่มลิงก์";
+  $("linkSubmit").textContent = l ? "อัปเดต" : "บันทึก";
+  $("fName").value = l ? l.name : "";
+  $("fUrl").value = l ? l.url : "";
+  $("fCat").value = l ? (l.cat || "") : (filterKey && filterKey !== NONE ? filterKey : "");
+  iconVal = l ? (l.icon || "") : "";
+  colorVal = l ? (l.color || "") : "";
+  $("fIcon").value = /^data:/i.test(iconVal) ? "" : iconVal;
+  $("fIcon").placeholder = /^data:/i.test(iconVal) ? "✅ ใช้รูปที่อัปโหลดแล้ว" : "เว้นว่าง = ไอคอนเว็บอัตโนมัติ / ใส่อีโมจิ / วางลิงก์รูป";
+  $("fColor").value = colorVal || "#ffffff";
+  renderPreview();
+  $("linkDlg").showModal();
+  $("fName").focus();
+}
+$("btnAdd").onclick = () => openLinkDlg(null);
+$("linkCancel").onclick = () => $("linkDlg").close();
+
+$("fIcon").addEventListener("input", () => { iconVal = $("fIcon").value.trim(); $("fIcon").placeholder = "เว้นว่าง = ไอคอนเว็บอัตโนมัติ / ใส่อีโมจิ / วางลิงก์รูป"; renderPreview(); });
+$("fUrl").addEventListener("change", renderPreview);
+$("fColor").addEventListener("input", () => { colorVal = $("fColor").value; renderPreview(); });
+$("btnColorClear").onclick = () => { colorVal = ""; $("fColor").value = "#ffffff"; renderPreview(); };
+$("btnIconClear").onclick = () => { iconVal = ""; $("fIcon").value = ""; $("fIcon").placeholder = "เว้นว่าง = ไอคอนเว็บอัตโนมัติ / ใส่อีโมจิ / วางลิงก์รูป"; renderPreview(); };
+EMOJIS.forEach(e => {
+  const b = document.createElement("button");
+  b.type = "button"; b.textContent = e;
+  b.onclick = () => { iconVal = e; $("fIcon").value = e; renderPreview(); };
+  $("emojis").appendChild(b);
+});
+
+function fileToIcon(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = 72, c = document.createElement("canvas");
+      c.width = c.height = s;
+      const ctx = c.getContext("2d");
+      const r = Math.max(s / img.width, s / img.height), w = img.width * r, h = img.height * r;
+      ctx.drawImage(img, (s - w) / 2, (s - h) / 2, w, h);
+      URL.revokeObjectURL(u);
+      let d = c.toDataURL("image/png");
+      if (d.length > 40000) d = c.toDataURL("image/jpeg", 0.8);
+      resolve(d);
+    };
+    img.onerror = () => reject(new Error("อ่านรูปไม่ได้"));
+    img.src = u;
+  });
+}
+$("btnUpload").onclick = () => $("iconFile").click();
+$("iconFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  try {
+    iconVal = await fileToIcon(f);
+    $("fIcon").value = ""; $("fIcon").placeholder = "✅ ใช้รูปที่อัปโหลดแล้ว";
+    renderPreview();
+  } catch (err) { alert(err.message); }
+};
+
+$("linkForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const base = { name: $("fName").value.trim(), url: normalizeUrl($("fUrl").value), cat: $("fCat").value.trim() };
+  const item = {
+    id: editingId || newId(),
+    name: $("fName").value.trim(),
+    url: normalizeUrl($("fUrl").value),
+    cat: $("fCat").value.trim(),
+    icon: iconVal, color: colorVal,
+  };
   const wasEditing = editingId;
-  const item = { id: wasEditing || newId(), ...base };
-  openForm(false);
+  $("linkDlg").close();
   if (wasEditing) await mutate("update", { item }, () => { links = links.map(l => l.id === item.id ? item : l); });
   else await mutate("add", { item }, () => { links.push(item); });
 });
 
-// ---------- ตั้งค่า ----------
-$("btnCfg").onclick = () => {
-  $("cfgUrl").value = cfg.url || ""; $("cfgToken").value = cfg.token || "";
-  $("form").classList.remove("open");
-  $("cfgForm").classList.toggle("open");
+// ---------- Dialog: จัดการหมวดหมู่ ----------
+function openCatDlg() { renderCatRows(); $("catDlg").showModal(); }
+function renderCatRows() {
+  const box = $("catRows"); box.innerHTML = "";
+  const list = allCats();
+  if (!list.length) { box.innerHTML = '<div class="hint">ยังไม่มีหมวดหมู่</div>'; return; }
+  list.forEach(c => {
+    const row = document.createElement("div"); row.className = "catrow";
+    const ic = document.createElement("input"); ic.className = "ic"; ic.value = c.icon || ""; ic.placeholder = "📁"; ic.maxLength = 4;
+    const nm = document.createElement("input"); nm.value = c.name;
+    const sv = document.createElement("button"); sv.className = "small primary"; sv.textContent = "บันทึก";
+    sv.onclick = async () => {
+      const name = nm.value.trim();
+      if (!name) return alert("กรุณาใส่ชื่อหมวดหมู่");
+      if (name !== c.name && allCats().some(x => x.name === name)) return alert("มีหมวดหมู่ชื่อนี้อยู่แล้ว");
+      await saveCat({ name, icon: ic.value.trim() }, c.name);
+    };
+    const del = document.createElement("button"); del.className = "small danger"; del.textContent = "ลบ";
+    del.onclick = async () => {
+      if (!confirm("ลบหมวด “" + c.name + "” ?\n(ลิงก์ในหมวดนี้จะไม่ถูกลบ แต่ไปอยู่ในกลุ่ม “ทั่วไป”)")) return;
+      await mutate("catDelete", { name: c.name }, () => {
+        cats = cats.filter(x => x.name !== c.name);
+        links.forEach(l => { if (l.cat === c.name) l.cat = ""; });
+      });
+      if (filterKey === c.name) filterKey = "";
+      renderCatRows(); render();
+    };
+    row.append(ic, nm, sv, del);
+    box.appendChild(row);
+  });
+}
+async function saveCat(cat, oldName) {
+  await mutate("catSave", { cat, oldName }, () => {
+    const i = cats.findIndex(c => c.name === oldName);
+    if (i >= 0) cats[i] = cat; else cats.push(cat);
+    if (oldName && oldName !== cat.name) links.forEach(l => { if (l.cat === oldName) l.cat = cat.name; });
+  });
+  if (filterKey === oldName && oldName !== cat.name) filterKey = cat.name;
+  renderCatRows(); render();
+}
+$("newCatAdd").onclick = async () => {
+  const name = $("newCatName").value.trim();
+  if (!name) return $("newCatName").focus();
+  if (allCats().some(c => c.name === name)) return alert("มีหมวดหมู่ชื่อนี้อยู่แล้ว");
+  await saveCat({ name, icon: $("newCatIcon").value.trim() }, "");
+  $("newCatName").value = ""; $("newCatIcon").value = "";
 };
-$("cfgCancel").onclick = () => $("cfgForm").classList.remove("open");
-$("cfgLocal").onclick = () => {
-  cfg = {}; saveJSON(CFG_KEY, cfg);
-  $("cfgForm").classList.remove("open"); idleStatus();
-};
+$("catClose").onclick = () => $("catDlg").close();
+
+// ---------- Dialog: ตั้งค่า ----------
+function openCfg() { $("cfgUrl").value = cfg.url || ""; $("cfgToken").value = cfg.token || ""; $("cfgDlg").showModal(); }
+$("fCfg").onclick = openCfg;
+$("cfgCancel").onclick = () => $("cfgDlg").close();
+$("cfgLocal").onclick = () => { cfg = {}; saveJSON(CFG_KEY, cfg); $("cfgDlg").close(); idleStatus(); };
 $("cfgForm").addEventListener("submit", async e => {
   e.preventDefault();
   cfg = { url: $("cfgUrl").value.trim(), token: $("cfgToken").value.trim() };
   saveJSON(CFG_KEY, cfg);
-  $("cfgForm").classList.remove("open");
-  const local = links.slice();
+  $("cfgDlg").close();
+  const localLinks = links.slice(), localCats = cats.slice();
   const ok = await call("list");
-  if (ok && !links.length && local.length &&
-      confirm("ใน Google Sheets ยังไม่มีข้อมูล — อัปโหลดลิงก์ " + local.length + " รายการจากเครื่องนี้ขึ้นไปไหม?")) {
-    await call("replaceAll", { links: local });
+  if (ok && !links.length && localLinks.length &&
+      confirm("ใน Google Sheets ยังไม่มีข้อมูล — อัปโหลดลิงก์ " + localLinks.length + " รายการจากเครื่องนี้ขึ้นไปไหม?")) {
+    await call("replaceAll", { links: localLinks, cats: localCats });
   }
 });
 
-// ---------- Export / Import ----------
-$("btnExport").onclick = () => {
-  const blob = new Blob([JSON.stringify(links, null, 2)], { type: "application/json" });
+// ---------- Footer tools ----------
+$("fMgrCat").onclick = openCatDlg;
+$("fSync").onclick = () => { if (remote()) call("list"); else idleStatus(); };
+$("fExport").onclick = () => {
+  const blob = new Blob([JSON.stringify({ links, cats }, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "shortcuts.json";
-  a.click();
+  a.href = URL.createObjectURL(blob); a.download = "shortcuts.json"; a.click();
   URL.revokeObjectURL(a.href);
 };
-$("btnImport").onclick = () => $("file").click();
+$("fImport").onclick = () => $("file").click();
 $("file").onchange = e => {
-  const f = e.target.files[0]; if (!f) return;
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
   const r = new FileReader();
   r.onload = () => {
     try {
       const data = JSON.parse(r.result);
-      if (!Array.isArray(data)) throw 0;
-      const clean = data.filter(x => x && x.name && x.url)
-        .map(x => ({ id: String(x.id || newId()), name: String(x.name), url: String(x.url), cat: x.cat ? String(x.cat) : "" }));
-      if (confirm("แทนที่ลิงก์ทั้งหมดด้วยไฟล์นี้ (" + clean.length + " รายการ) ?"))
-        mutate("replaceAll", { links: clean }, () => { links = clean; });
+      const rawLinks = Array.isArray(data) ? data : data.links;      // รองรับไฟล์ Export แบบเก่า (array)
+      const rawCats = Array.isArray(data) ? [] : (data.cats || []);
+      if (!Array.isArray(rawLinks)) throw 0;
+      const L = rawLinks.filter(x => x && x.name && x.url).map(x => ({
+        id: String(x.id || newId()), name: String(x.name), url: String(x.url),
+        cat: x.cat ? String(x.cat) : "", icon: x.icon ? String(x.icon) : "", color: x.color ? String(x.color) : "",
+      }));
+      const C = rawCats.filter(x => x && x.name).map(x => ({ name: String(x.name), icon: x.icon ? String(x.icon) : "" }));
+      if (confirm("แทนที่ข้อมูลทั้งหมดด้วยไฟล์นี้ (" + L.length + " ลิงก์, " + C.length + " หมวดหมู่) ?"))
+        mutate("replaceAll", { links: L, cats: C }, () => { links = L; cats = C; });
     } catch (err) { alert("ไฟล์ไม่ถูกต้อง"); }
   };
   r.readAsText(f);
-  e.target.value = "";
 };
 
 // ---------- เริ่มต้น ----------
+$("copy").textContent = "© " + new Date().getFullYear() + " My Shortcuts";
 render();
 idleStatus();
 if (remote()) call("list");
