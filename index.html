@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Shortcuts</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --text: #1f2430; --muted: #6b7280;
+    --border: #e3e6ec; --accent: #3b6cf6; --danger: #e5484d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14161b; --card: #1d2027; --text: #e8eaee; --muted: #9aa1ad; --border: #2c303a; --accent: #6b8cff; --danger: #ff6369; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif; background: var(--bg); color: var(--text); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  h1 { font-size: 1.4rem; margin: 0; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+  input, select, button { font: inherit; color: inherit; }
+  input, select { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button { padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.danger:hover { border-color: var(--danger); color: var(--danger); }
+  #search { min-width: 200px; }
+  .status { font-size: .8rem; color: var(--muted); margin-bottom: 16px; min-height: 1.2em; }
+  .status.err { color: var(--danger); }
+  .add-form { display: none; gap: 8px; flex-wrap: wrap; padding: 14px; margin-bottom: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+  .add-form.open { display: flex; }
+  .add-form input { flex: 1 1 180px; }
+  .group { margin-bottom: 24px; }
+  .group h2 { font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .item { position: relative; display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: inherit; transition: transform .1s, border-color .1s; }
+  .item:hover { transform: translateY(-1px); border-color: var(--accent); }
+  .item img { width: 28px; height: 28px; border-radius: 6px; flex: none; }
+  .item .t { min-width: 0; }
+  .item .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item .host { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .actions { position: absolute; top: 6px; right: 6px; display: none; gap: 4px; }
+  body.edit .actions { display: flex; }
+  .actions button { padding: 2px 8px; font-size: .8rem; }
+  .empty { text-align: center; color: var(--muted); padding: 48px 0; }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: 28px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🔗 My Shortcuts</h1>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="ค้นหา...">
+      <button class="primary" id="btnAdd">+ เพิ่มลิงก์</button>
+      <button id="btnEdit">✏️ แก้ไข/ลบ</button>
+      <button id="btnSync" title="โหลดข้อมูลล่าสุดจาก Google Sheets">🔄</button>
+      <button id="btnCfg">⚙️ ตั้งค่า</button>
+      <button id="btnExport">Export</button>
+      <button id="btnImport">Import</button>
+      <input id="file" type="file" accept="application/json" hidden>
+    </div>
+  </header>
+  <div class="status" id="status"></div>
+
+  <form class="add-form" id="cfgForm">
+    <input id="cfgUrl" placeholder="Web App URL (https://script.google.com/macros/s/.../exec)">
+    <input id="cfgToken" type="password" placeholder="Token (รหัสเดียวกับใน Code.gs)">
+    <button class="primary" type="submit">บันทึกและเชื่อมต่อ</button>
+    <button type="button" id="cfgLocal">ใช้โหมดเครื่องนี้</button>
+    <button type="button" id="cfgCancel">ปิด</button>
+  </form>
+
+  <form class="add-form" id="form">
+    <input id="fName" placeholder="ชื่อ เช่น Gmail" required>
+    <input id="fUrl" placeholder="URL เช่น https://mail.google.com" required>
+    <input id="fCat" placeholder="หมวดหมู่ (ไม่บังคับ)" list="cats">
+    <datalist id="cats"></datalist>
+    <button class="primary" type="submit" id="fSubmit">บันทึก</button>
+    <button type="button" id="fCancel">ยกเลิก</button>
+  </form>
+
+  <main id="list"></main>
+  <p class="hint">ค่าตั้งค่า (URL/Token) เก็บในเบราว์เซอร์ของคุณเท่านั้น ไม่ได้อยู่ในไฟล์นี้</p>
+</div>
+
+<script>
+const DATA_KEY = "my-shortcuts-v1";
+const CFG_KEY = "my-shortcuts-cfg";
+const DEFAULTS = [
+  { id: "d1", name: "Gmail", url: "https://mail.google.com", cat: "Google" },
+  { id: "d2", name: "Google Drive", url: "https://drive.google.com", cat: "Google" },
+  { id: "d3", name: "Google Sheets", url: "https://sheets.google.com", cat: "Google" },
+  { id: "d4", name: "GitHub", url: "https://github.com", cat: "Dev" },
+];
+const $ = id => document.getElementById(id);
+
+let cfg = loadJSON(CFG_KEY, {});
+let links = loadJSON(DATA_KEY, null) || DEFAULTS.slice();
+let editingId = null;
+
+function loadJSON(k, fb) { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } }
+function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+const remote = () => !!(cfg.url && cfg.token);
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+function setStatus(msg, err) { const s = $("status"); s.textContent = msg; s.classList.toggle("err", !!err); }
+function idleStatus() { setStatus(remote() ? "☁️ เชื่อมต่อ Google Sheets แล้ว" : "💾 โหมดเครื่องนี้ (ยังไม่ได้เชื่อม Google Sheets — กด ⚙️ ตั้งค่า)"); }
+
+async function call(action, payload = {}) {
+  setStatus("กำลังซิงก์...");
+  try {
+    const r = await fetch(cfg.url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ token: cfg.token, action, ...payload }),
+    });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || "เกิดข้อผิดพลาด");
+    links = j.links;
+    saveJSON(DATA_KEY, links);
+    render();
+    setStatus("✅ ซิงก์กับ Google Sheets แล้ว");
+    return true;
+  } catch (e) {
+    setStatus("⚠️ ซิงก์ไม่สำเร็จ: " + e.message, true);
+    return false;
+  }
+}
+
+async function mutate(action, payload, localFn) {
+  if (remote()) { await call(action, payload); }
+  else { localFn(); saveJSON(DATA_KEY, links); render(); }
+}
+
+function normalizeUrl(u) {
+  u = u.trim();
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
+  return u;
+}
+function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return u; } }
+
+function render() {
+  const q = $("search").value.trim().toLowerCase();
+  const list = $("list");
+  list.innerHTML = "";
+
+  const filtered = links.filter(l => !q || (l.name + " " + l.url + " " + (l.cat || "")).toLowerCase().includes(q));
+  if (!filtered.length) {
+    const d = document.createElement("div");
+    d.className = "empty";
+    d.textContent = links.length ? "ไม่พบลิงก์ที่ค้นหา" : "ยังไม่มีลิงก์ — กด “+ เพิ่มลิงก์”";
+    list.appendChild(d);
+  }
+
+  const groups = {};
+  filtered.forEach(l => { (groups[l.cat || "ทั่วไป"] ||= []).push(l); });
+  Object.keys(groups).forEach(cat => {
+    const g = document.createElement("section");
+    g.className = "group";
+    const h = document.createElement("h2");
+    h.textContent = cat;
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    groups[cat].forEach(l => grid.appendChild(card(l)));
+    g.append(h, grid);
+    list.appendChild(g);
+  });
+
+  const dl = $("cats");
+  dl.innerHTML = "";
+  [...new Set(links.map(l => l.cat).filter(Boolean))].forEach(c => {
+    const o = document.createElement("option"); o.value = c; dl.appendChild(o);
+  });
+}
+
+function card(l) {
+  const a = document.createElement("a");
+  a.className = "item";
+  a.href = l.url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.addEventListener("click", e => { if (document.body.classList.contains("edit")) e.preventDefault(); });
+
+  const img = document.createElement("img");
+  img.alt = ""; img.loading = "lazy";
+  img.src = "https://www.google.com/s2/favicons?sz=64&domain=" + encodeURIComponent(hostOf(l.url));
+
+  const t = document.createElement("div");
+  t.className = "t";
+  const n = document.createElement("div"); n.className = "name"; n.textContent = l.name;
+  const h = document.createElement("div"); h.className = "host"; h.textContent = hostOf(l.url);
+  t.append(n, h);
+
+  const act = document.createElement("div");
+  act.className = "actions";
+  const be = document.createElement("button"); be.textContent = "แก้";
+  be.onclick = e => { e.preventDefault(); e.stopPropagation(); startEdit(l.id); };
+  const bd = document.createElement("button"); bd.textContent = "ลบ"; bd.className = "danger";
+  bd.onclick = e => {
+    e.preventDefault(); e.stopPropagation();
+    if (confirm("ลบ “" + l.name + "” ?"))
+      mutate("delete", { id: l.id }, () => { links = links.filter(x => x.id !== l.id); });
+  };
+  act.append(be, bd);
+
+  a.append(img, t, act);
+  return a;
+}
+
+function openForm(open) {
+  $("form").classList.toggle("open", open);
+  if (open) { $("cfgForm").classList.remove("open"); $("fName").focus(); }
+  else { editingId = null; $("form").reset(); $("fSubmit").textContent = "บันทึก"; }
+}
+function startEdit(id) {
+  const l = links.find(x => x.id === id); if (!l) return;
+  editingId = id;
+  $("fName").value = l.name; $("fUrl").value = l.url; $("fCat").value = l.cat || "";
+  $("fSubmit").textContent = "อัปเดต";
+  openForm(true);
+  $("form").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+$("btnAdd").onclick = () => { editingId = null; $("form").reset(); openForm(true); };
+$("fCancel").onclick = () => openForm(false);
+$("btnEdit").onclick = () => {
+  const on = document.body.classList.toggle("edit");
+  $("btnEdit").textContent = on ? "✅ เสร็จสิ้น" : "✏️ แก้ไข/ลบ";
+};
+$("search").addEventListener("input", render);
+$("btnSync").onclick = () => { if (remote()) call("list"); else idleStatus(); };
+
+$("form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const base = { name: $("fName").value.trim(), url: normalizeUrl($("fUrl").value), cat: $("fCat").value.trim() };
+  const wasEditing = editingId;
+  const item = { id: wasEditing || newId(), ...base };
+  openForm(false);
+  if (wasEditing) await mutate("update", { item }, () => { links = links.map(l => l.id === item.id ? item : l); });
+  else await mutate("add", { item }, () => { links.push(item); });
+});
+
+// ---------- ตั้งค่า ----------
+$("btnCfg").onclick = () => {
+  $("cfgUrl").value = cfg.url || ""; $("cfgToken").value = cfg.token || "";
+  $("form").classList.remove("open");
+  $("cfgForm").classList.toggle("open");
+};
+$("cfgCancel").onclick = () => $("cfgForm").classList.remove("open");
+$("cfgLocal").onclick = () => {
+  cfg = {}; saveJSON(CFG_KEY, cfg);
+  $("cfgForm").classList.remove("open"); idleStatus();
+};
+$("cfgForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  cfg = { url: $("cfgUrl").value.trim(), token: $("cfgToken").value.trim() };
+  saveJSON(CFG_KEY, cfg);
+  $("cfgForm").classList.remove("open");
+  const local = links.slice();
+  const ok = await call("list");
+  if (ok && !links.length && local.length &&
+      confirm("ใน Google Sheets ยังไม่มีข้อมูล — อัปโหลดลิงก์ " + local.length + " รายการจากเครื่องนี้ขึ้นไปไหม?")) {
+    await call("replaceAll", { links: local });
+  }
+});
+
+// ---------- Export / Import ----------
+$("btnExport").onclick = () => {
+  const blob = new Blob([JSON.stringify(links, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "shortcuts.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$("btnImport").onclick = () => $("file").click();
+$("file").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!Array.isArray(data)) throw 0;
+      const clean = data.filter(x => x && x.name && x.url)
+        .map(x => ({ id: String(x.id || newId()), name: String(x.name), url: String(x.url), cat: x.cat ? String(x.cat) : "" }));
+      if (confirm("แทนที่ลิงก์ทั้งหมดด้วยไฟล์นี้ (" + clean.length + " รายการ) ?"))
+        mutate("replaceAll", { links: clean }, () => { links = clean; });
+    } catch (err) { alert("ไฟล์ไม่ถูกต้อง"); }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+};
+
+// ---------- เริ่มต้น ----------
+render();
+idleStatus();
+if (remote()) call("list");
+</script>
+</body>
+</html>
